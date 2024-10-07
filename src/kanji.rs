@@ -1,3 +1,4 @@
+use crate::anki::{AnkiConnectClient, AnkiError};
 use crate::query::{
     ApiCollectionMessage, ApiObjectMessage, ApiSubjectMessage, QueryClient, QueryError,
 };
@@ -43,4 +44,11 @@ pub struct ApiKanjiReadingMessage {
     pub primary: bool,
     pub accepted_answer: bool,
     pub r#type: String,
+}
+
+impl AnkiConnectClient {
+    #[tracing::instrument(skip(self), err)]
+    pub async fn create_model(&self) -> Result<(), AnkiError> {
+        todo!()
+    }
 }

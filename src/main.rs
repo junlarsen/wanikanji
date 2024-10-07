@@ -1,6 +1,7 @@
 use crate::query::QueryClient;
 use clap::Parser;
 
+mod anki;
 mod kanji;
 mod query;
 
