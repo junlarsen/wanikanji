@@ -1,4 +1,4 @@
-# WaniKani is cool, but it's SRS is hardly configurable
+# WaniKani is cool, but its SRS is hardly configurable
 
 This is a small program that queries WaniKani's API for kanji subjects and adds them to a local Anki deck using the Anki
 Connect API.
