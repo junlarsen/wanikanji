@@ -1,4 +1,4 @@
-use crate::anki_connect::rpc::AnkiRequest;
+use crate::anki_connect::rpc::{AnkiRequest, CommandRequest, CommandResponse};
 use reqwest::Client;
 use thiserror::Error;
 
@@ -8,6 +8,8 @@ pub enum AnkiError {
     AnkiError(#[from] reqwest::Error),
     #[error("anki data serde error: {0}")]
     SerdeError(#[from] serde_json::Error),
+    #[error("anki api error: {0}")]
+    ApiError(String),
 }
 
 pub struct AnkiClient<'a> {
@@ -36,14 +38,23 @@ impl<'a> AnkiClient<'a> {
         T: serde::Serialize,
         T::Response: for<'de> serde::Deserialize<'de>,
     {
-        let request = serde_json::to_string(&request)?;
+        let request = CommandRequest {
+            action: T::ACTION.to_owned(),
+            version: T::VERSION,
+            params: request,
+        };
         let response = self
             .client
             .post(self.endpoint)
             .json(&request)
             .send()
             .await?;
-        let response = response.json::<T::Response>().await?;
-        Ok(response)
+        let response = response.json::<CommandResponse<T::Response>>().await?;
+
+        match (response.result, response.error) {
+            (Some(result), _) => Ok(result),
+            (None, Some(error)) => Err(AnkiError::ApiError(error)),
+            (None, None) => Err(AnkiError::ApiError("no result or error".to_owned())),
+        }
     }
 }

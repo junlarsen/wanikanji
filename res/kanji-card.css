@@ -1,0 +1,57 @@
+:root {
+    --kanji-color: #12A594;
+    --black-color: #1C2024;
+
+    font-family: 'Noto Sans JP', 'Noto Sans', sans-serif;
+}
+
+.card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    max-width: 1024px;
+    margin: 0 auto;
+    padding: 4rem;
+    color: var(--black-color);
+}
+
+.card--kanji {
+    background-color: var(--kanji-color);
+}
+
+.card__title {
+    text-align: center;
+}
+
+.card__reference-anchor {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    text-align: right;
+
+    & > a {
+        text-decoration: none;
+        color: var(--black-color);
+        font-weight: bold;
+    }
+}
+
+.context {
+    border-top: 1px solid var(--black-color);
+    margin-top: 4rem;
+    padding-top: 1rem;
+
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.context__title {
+    font-weight: bold;
+    margin-bottom: 0;
+}
+
+.context__item {
+    width: 50%;
+}
