@@ -1,5 +1,7 @@
 :root {
     --kanji-color: #12A594;
+    --vocabulary-color: #0090FF;
+    --vocabulary-color-high-contrast: #113264;
     --black-color: #1C2024;
 
     font-family: 'Noto Sans JP', 'Noto Sans', sans-serif;
@@ -17,6 +19,10 @@
 
 .card--kanji {
     background-color: var(--kanji-color);
+}
+
+.card--vocabulary {
+    background-color: var(--vocabulary-color);
 }
 
 .card__title {
@@ -54,4 +60,16 @@
 
 .context__item {
     width: 50%;
+}
+
+.context__list {
+    & > dt {
+        font-size: 24px;
+    }
+
+    & > dd {
+        margin-left: 0;
+        margin-bottom: 1rem;
+        color: var(--vocabulary-color-high-contrast)
+    }
 }

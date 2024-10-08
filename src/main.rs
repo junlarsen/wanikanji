@@ -1,16 +1,16 @@
-use crate::anki::into_anki_input;
 use crate::anki_connect::client::{AnkiClient, AnkiError};
 use crate::io::FilesystemCache;
 use crate::kanji::ApiKanjiMessage;
 use crate::query::QueryClient;
+use crate::vocabulary::ApiVocabularyMessage;
 use clap::Parser;
 
-mod anki;
+pub mod anki;
 pub mod anki_connect;
-mod io;
+pub mod io;
 pub mod kanji;
 pub mod query;
-mod vocabulary;
+pub mod vocabulary;
 
 #[derive(clap::Parser)]
 pub struct Options {
@@ -24,22 +24,31 @@ pub struct Options {
     pub anki_endpoint: String,
 }
 
+const DEFAULT_KANJI_DECK_NAME: &'static str = "Japanese Kanji";
+const DEFAULT_VOCABULARY_DECK_NAME: &'static str = "Japanese Vocabulary";
+
 #[derive(clap::Subcommand)]
 pub enum Command {
     QueryKanji,
     QueryVocabulary,
-    AddCardModel {
-        #[clap(short, long, default_value = "Japanese Kanji")]
+    CreateKanjiDeck {
+        #[clap(short, long, default_value = DEFAULT_KANJI_DECK_NAME)]
         name: String,
     },
-    AddCardDeck {
-        #[clap(short, long, default_value = "Japanese Kanji")]
+    CreateVocabularyDeck {
+        #[clap(short, long, default_value = DEFAULT_VOCABULARY_DECK_NAME)]
         name: String,
     },
     InstallKanji {
-        #[clap(short, long, default_value = "Japanese Kanji")]
+        #[clap(short, long, default_value = DEFAULT_KANJI_DECK_NAME)]
         deck_name: String,
-        #[clap(short, long, default_value = "Japanese Kanji")]
+        #[clap(short, long, default_value = DEFAULT_KANJI_DECK_NAME)]
+        model_name: String,
+    },
+    InstallVocabulary {
+        #[clap(short, long, default_value = DEFAULT_VOCABULARY_DECK_NAME)]
+        deck_name: String,
+        #[clap(short, long, default_value = DEFAULT_VOCABULARY_DECK_NAME)]
         model_name: String,
     },
 }
@@ -62,13 +71,13 @@ async fn main() -> anyhow::Result<()> {
             let vocabulary = wanikani_client.list_vocabulary().await?;
             cache.insert("vocabulary", &vocabulary).await?;
         }
-        Command::AddCardModel { name } => {
-            let client = AnkiClient::default();
-            client.create_model(&name).await?;
+        Command::CreateKanjiDeck { name } => {
+            anki_client.create_kanji_model(&name).await?;
+            anki_client.create_deck(&name).await?;
         }
-        Command::AddCardDeck { name } => {
-            let client = AnkiClient::default();
-            client.create_deck(&name).await?;
+        Command::CreateVocabularyDeck { name } => {
+            anki_client.create_vocabulary_model(&name).await?;
+            anki_client.create_deck(&name).await?;
         }
         Command::InstallKanji {
             deck_name,
@@ -78,18 +87,73 @@ async fn main() -> anyhow::Result<()> {
             match kanji {
                 Some(kanji) => {
                     for kanji in kanji {
-                        let input = into_anki_input(kanji, &model_name, &deck_name);
+                        let input = kanji.into_anki_input(&model_name, &deck_name);
                         // SAFETY: This function has to perform a retry loop, because the Anki Connect API server tends to
                         // become overwhelmed with requests when it's fired off rapidly at the speed tokio+reqwest can perform.
                         fn is_connection_error(e: &AnkiError) -> bool {
                             matches!(e, AnkiError::HttpError(e) if e.is_connect())
                         }
-                        again::retry_if(|| anki_client.send(input.clone()), is_connection_error)
-                            .await?;
+                        again::retry_if(
+                            || async {
+                                match anki_client.send(input.clone()).await {
+                                    Ok(_) => Ok(()),
+                                    Err(AnkiError::ApiError(err))
+                                        if err.contains(
+                                            "cannot create note because it is a duplicate",
+                                        ) =>
+                                    {
+                                        Ok(())
+                                    }
+                                    Err(e) => Err(e),
+                                }
+                            },
+                            is_connection_error,
+                        )
+                        .await?;
                     }
                 }
                 None => {
                     tracing::error!("you must fetch kanji information before installing to deck")
+                }
+            }
+        }
+        Command::InstallVocabulary {
+            deck_name,
+            model_name,
+        } => {
+            let vocabulary = cache.get::<Vec<ApiVocabularyMessage>>("vocabulary").await?;
+            match vocabulary {
+                Some(vocabulary) => {
+                    for vocabulary in vocabulary {
+                        let input = vocabulary.into_anki_input(&model_name, &deck_name);
+                        // SAFETY: This function has to perform a retry loop, because the Anki Connect API server tends to
+                        // become overwhelmed with requests when it's fired off rapidly at the speed tokio+reqwest can perform.
+                        fn is_connection_error(e: &AnkiError) -> bool {
+                            matches!(e, AnkiError::HttpError(e) if e.is_connect())
+                        }
+                        again::retry_if(
+                            || async {
+                                match anki_client.send(input.clone()).await {
+                                    Ok(_) => Ok(()),
+                                    Err(AnkiError::ApiError(err))
+                                        if err.contains(
+                                            "cannot create note because it is a duplicate",
+                                        ) =>
+                                    {
+                                        Ok(())
+                                    }
+                                    Err(e) => Err(e),
+                                }
+                            },
+                            is_connection_error,
+                        )
+                        .await?;
+                    }
+                }
+                None => {
+                    tracing::error!(
+                        "you must fetch vocabulary information before installing to deck"
+                    )
                 }
             }
         }

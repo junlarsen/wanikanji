@@ -63,6 +63,7 @@ pub mod create_model {
         pub name: String,
         pub flds: Vec<CreateModelFieldMessage>,
         pub tmpls: Vec<CreateModelTemplateMessage>,
+        #[serde(default)]
         pub tags: Vec<Value>,
         pub id: i64,
         pub req: Value,

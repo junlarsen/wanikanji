@@ -1,0 +1,49 @@
+<link rel="stylesheet" href="anki.css">
+
+<div class="card card--vocabulary">
+  <h1 class="card__title">
+    {{primary-meaning}} &mdash; {{primary-reading}}
+  </h1>
+  <div class="card__reference-anchor">
+    <a href="{{reference-url}}">Open in WK</a>
+  </div>
+  <div class="context">
+    <div class="context__item">
+      <h4 class="context__title">Mnemonic</h4>
+      <p>{{primary-meaning-mnemonic}}</p>
+    </div>
+    <div class="context__item">
+      <h4 class="context__title">Reading Mnemonic</h4>
+      <p>{{primary-reading-mnemonic}}</p>
+    </div>
+    <div class="context__item">
+      <h4 class="context__title">Readings</h4>
+      <p>{{secondary-readings}}</p>
+    </div>
+  </div>
+  <div class="context">
+    <div>
+      <h4 class="context__title">Context sentences</h4>
+      <dl class="context__list">
+        <dt>
+          {{context-sentence-1-ja}}
+        </dt>
+        <dd>
+          {{context-sentence-1-en}}
+        </dd>
+        <dt>
+          {{context-sentence-2-ja}}
+        </dt>
+        <dd>
+          {{context-sentence-2-en}}
+        </dd>
+        <dt>
+          {{context-sentence-3-ja}}
+        </dt>
+        <dd>
+          {{context-sentence-3-en}}
+        </dd>
+      </dl>
+    </div>
+  </div>
+</div>
