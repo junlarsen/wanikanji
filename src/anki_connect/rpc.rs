@@ -125,13 +125,13 @@ pub mod add_note {
     use serde_json::Value;
     use std::collections::HashMap;
 
-    #[derive(Debug, Serialize)]
+    #[derive(Debug, Serialize, Clone)]
     #[serde(rename_all = "camelCase")]
     pub struct AddNoteInput {
-        pub note: String,
+        pub note: AddNoteNoteMessage,
     }
 
-    #[derive(Debug, Serialize)]
+    #[derive(Debug, Serialize, Clone)]
     #[serde(rename_all = "camelCase")]
     pub struct AddNoteNoteMessage {
         pub deck_name: String,
@@ -143,7 +143,7 @@ pub mod add_note {
         pub picture: Vec<Value>,
     }
 
-    #[derive(Debug, Serialize)]
+    #[derive(Debug, Serialize, Clone)]
     #[serde(rename_all = "camelCase")]
     pub struct AddNoteOptionsMessage {
         pub allow_duplicate: bool,
@@ -151,7 +151,7 @@ pub mod add_note {
         pub duplicate_scope_options: AddNoteDuplicateScopeOptionsMessage,
     }
 
-    #[derive(Debug, Serialize)]
+    #[derive(Debug, Serialize, Clone)]
     #[serde(rename_all = "camelCase")]
     pub struct AddNoteDuplicateScopeOptionsMessage {
         pub deck_name: String,

@@ -1,11 +1,12 @@
 use crate::anki_connect::rpc::{AnkiRequest, CommandRequest, CommandResponse};
 use reqwest::Client;
+use std::time::Duration;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum AnkiError {
     #[error("anki http request error: {0}")]
-    AnkiError(#[from] reqwest::Error),
+    HttpError(#[from] reqwest::Error),
     #[error("anki data serde error: {0}")]
     SerdeError(#[from] serde_json::Error),
     #[error("anki api error: {0}")]
@@ -26,7 +27,10 @@ impl Default for AnkiClient<'_> {
 impl<'a> AnkiClient<'a> {
     pub fn from_endpoint(endpoint: &'a str) -> Self {
         Self {
-            client: Client::new(),
+            client: Client::builder()
+                .tcp_keepalive(Some(Duration::from_secs(60)))
+                .build()
+                .unwrap(),
             endpoint,
         }
     }
