@@ -13,6 +13,7 @@ pub mod query;
 pub mod vocabulary;
 
 #[derive(clap::Parser)]
+#[clap(author, version, about = "Export your WaniKani data into Anki decks", long_about = None)]
 pub struct Options {
     #[clap(subcommand)]
     pub command: Command,
@@ -29,22 +30,28 @@ const DEFAULT_VOCABULARY_DECK_NAME: &'static str = "Japanese Vocabulary";
 
 #[derive(clap::Subcommand)]
 pub enum Command {
+    #[clap(about = "Download all kanji data from wanikani")]
     QueryKanji,
+    #[clap(about = "Download all vocabulary data from wanikani")]
     QueryVocabulary,
+    #[clap(about = "Create Anki deck and Anki card type for Kanji")]
     CreateKanjiDeck {
         #[clap(short, long, default_value = DEFAULT_KANJI_DECK_NAME)]
         name: String,
     },
+    #[clap(about = "Create Anki deck and Anki card type for Vocabulary")]
     CreateVocabularyDeck {
         #[clap(short, long, default_value = DEFAULT_VOCABULARY_DECK_NAME)]
         name: String,
     },
+    #[clap(about = "Install previously downloaded Kanji data into Anki deck")]
     InstallKanji {
         #[clap(short, long, default_value = DEFAULT_KANJI_DECK_NAME)]
         deck_name: String,
         #[clap(short, long, default_value = DEFAULT_KANJI_DECK_NAME)]
         model_name: String,
     },
+    #[clap(about = "Install previously downloaded Vocabulary data into Anki deck")]
     InstallVocabulary {
         #[clap(short, long, default_value = DEFAULT_VOCABULARY_DECK_NAME)]
         deck_name: String,
