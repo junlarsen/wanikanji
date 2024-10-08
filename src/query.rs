@@ -1,5 +1,6 @@
 use futures::future::BoxFuture;
 use futures::FutureExt;
+use reqwest::header::HeaderMap;
 use reqwest::StatusCode;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
@@ -7,8 +8,6 @@ use thiserror::Error;
 
 #[derive(Debug, Error)]
 pub enum QueryError {
-    #[error("failed to read api token")]
-    MissingTokenError,
     #[error("http request error: {0}")]
     HttpError(#[from] reqwest::Error),
     #[error("http request returned non-200 response: {0}")]
@@ -18,16 +17,32 @@ pub enum QueryError {
 #[derive(Debug)]
 pub struct QueryClient {
     client: reqwest::Client,
-    api_token: String,
 }
 
 impl QueryClient {
-    /// Construct a new query client using the API_TOKEN environment variable as the WaniKani API
-    /// token.
-    pub fn from_env() -> Result<Self, QueryError> {
-        let api_token = std::env::var("API_TOKEN").map_err(|_| QueryError::MissingTokenError)?;
-        let client = reqwest::Client::new();
-        Ok(Self { client, api_token })
+    pub fn from_token(token: Option<&str>) -> Self {
+        let client = reqwest::Client::builder()
+            .default_headers({
+                let mut headers = HeaderMap::new();
+                headers.insert(
+                    "Wanikani-Revision",
+                    "20170710"
+                        .parse()
+                        .expect("failed to parse string as header value"),
+                );
+                if let Some(token) = token {
+                    headers.insert(
+                        "Authorization",
+                        format!("Bearer {}", token)
+                            .parse()
+                            .expect("failed to interpolate token into header value"),
+                    );
+                };
+                headers
+            })
+            .build()
+            .expect("failed to build reqwest client");
+        Self { client }
     }
 
     #[tracing::instrument(level = "debug", skip(self))]
@@ -36,13 +51,7 @@ impl QueryClient {
         url: &'a str,
     ) -> BoxFuture<'a, Result<T, QueryError>> {
         async move {
-            let response = self
-                .client
-                .get(url)
-                .header("Authorization", format!("Bearer {}", self.api_token))
-                .header("Wanikani-Revision", "20170710")
-                .send()
-                .await?;
+            let response = self.client.get(url).send().await?;
             if !response.status().is_success() {
                 tracing::error!("request failed: {:?}", response.status());
                 if response.status() == StatusCode::TOO_MANY_REQUESTS {
