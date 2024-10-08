@@ -46,7 +46,7 @@ pub struct ApiKanjiReadingMessage {
     pub r#type: String,
 }
 
-impl AnkiConnectClient {
+impl AnkiConnectClient<'_> {
     #[tracing::instrument(skip(self), err)]
     pub async fn create_model(&self) -> Result<(), AnkiError> {
         todo!()

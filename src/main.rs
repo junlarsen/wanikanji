@@ -1,3 +1,4 @@
+use crate::anki::AnkiConnectClient;
 use crate::query::QueryClient;
 use clap::Parser;
 
@@ -14,7 +15,10 @@ pub struct Options {
 #[derive(clap::Subcommand)]
 pub enum Command {
     QueryKanji,
-    CreateCardType,
+    CreateCardType {
+        #[clap(short, long, default_value = "Japanese Kanji")]
+        deck_name: String,
+    },
 }
 
 #[tokio::main]
@@ -31,7 +35,7 @@ async fn main() -> anyhow::Result<()> {
             }
             tokio::fs::write(".cache/kanji.json", serde_json::to_string_pretty(&kanji)?).await?;
         }
-        Command::CreateCardType => todo!(),
+        Command::CreateCardType { deck_name } => {}
     }
 
     Ok(())
