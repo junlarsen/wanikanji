@@ -9,7 +9,7 @@ impl AnkiClient<'_> {
     pub async fn create_model(&self, model_name: &str) -> Result<i64, AnkiError> {
         let request = CreateModelInput {
             model_name: model_name.to_owned(),
-            css: include_str!("../res/kanji-card.css").to_owned(),
+            css: include_str!("../res/anki.css").to_owned(),
             is_cloze: false,
             in_order_fields: vec![
                 "kanji".to_owned(),
