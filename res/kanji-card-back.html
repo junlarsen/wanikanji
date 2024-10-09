@@ -4,21 +4,25 @@
   <h1 class="card__title">
     {{primary-meaning}}
   </h1>
+
+  <h2 class="card__title">
+    {{readings}}
+  </h2>
   <div class="card__reference-anchor">
     <a href="{{reference-url}}">Open in WK</a>
   </div>
-  <div class="context">
+  <div class="context__grid context__grid--2">
     <div class="context__item">
-      <h4 class="context__title">Mnemonic</h4>
-      <p>{{primary-meaning-mnemonic}}</p>
+      <details>
+        <summary class="context__title">Mnemonic</summary>
+        <p>{{primary-meaning-mnemonic}}</p>
+      </details>
     </div>
     <div class="context__item">
-      <h4 class="context__title">Reading Mnemonic</h4>
-      <p>{{primary-reading-mnemonic}}</p>
-    </div>
-    <div class="context__item">
-      <h4 class="context__title">Readings</h4>
-      <p>{{readings}}</p>
+      <details>
+        <summary class="context__title">Reading Mnemonic</summary>
+        <p>{{primary-reading-mnemonic}}</p>
+      </details>
     </div>
   </div>
 </div>

@@ -192,3 +192,38 @@ pub mod update_model_styling {
         const ACTION: &'static str = "updateModelStyling";
     }
 }
+
+pub mod update_model_templates {
+    use crate::anki_connect::rpc::AnkiRequest;
+    use serde::Serialize;
+    use std::collections::HashMap;
+
+    #[derive(Debug, Serialize, Clone)]
+    #[serde(rename_all = "camelCase")]
+    pub struct UpdateModelTemplatesInput {
+        pub model: UpdateModelContentMessage,
+    }
+
+    #[derive(Debug, Serialize, Clone)]
+    #[serde(rename_all = "camelCase")]
+    pub struct UpdateModelContentMessage {
+        pub name: String,
+        pub templates: HashMap<String, UpdateModelCardTemplateMessage>,
+    }
+
+    #[derive(Debug, Serialize, Clone)]
+    #[serde(rename_all = "camelCase")]
+    pub struct UpdateModelCardTemplateMessage {
+        #[serde(rename = "Front")]
+        pub front: String,
+        #[serde(rename = "Back")]
+        pub back: String,
+    }
+
+    impl AnkiRequest for UpdateModelTemplatesInput {
+        type Response = ();
+
+        const VERSION: u16 = 6;
+        const ACTION: &'static str = "updateModelTemplates";
+    }
+}

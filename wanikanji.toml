@@ -1,7 +1,13 @@
 [kanji]
 deck_name = "Japanese Kanji"
 model_name = "Japanese Kanji"
+model_template_name = "Default type for 'Japanese Kanji'"
+model_template_front = "res/kanji-card-front.html"
+model_template_back = "res/kanji-card-back.html"
 
 [vocabulary]
 deck_name = "Japanese Vocabulary"
 model_name = "Japanese Vocabulary"
+model_template_name = "Default type for 'Japanese Vocabulary'"
+model_template_front = "res/vocabulary-card-front.html"
+model_template_back = "res/vocabulary-card-back.html"

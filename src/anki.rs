@@ -5,8 +5,12 @@ use crate::anki_connect::rpc::create_model::{CreateModelCardTemplateMessage, Cre
 use crate::anki_connect::rpc::update_model_styling::{
     UpdateModelModelMessage, UpdateModelStylingInput,
 };
+use crate::anki_connect::rpc::update_model_templates::{
+    UpdateModelCardTemplateMessage, UpdateModelContentMessage, UpdateModelTemplatesInput,
+};
 use crate::kanji::ApiKanjiMessage;
 use crate::vocabulary::ApiVocabularyMessage;
+use crate::ConfigurationDeckOptions;
 use std::collections::HashMap;
 
 impl AnkiClient<'_> {
@@ -24,7 +28,35 @@ impl AnkiClient<'_> {
         }
     }
 
-    pub async fn create_kanji_model(&self, model_name: &str) -> Result<i64, AnkiError> {
+    pub async fn update_model_templates(
+        &self,
+        model: &ConfigurationDeckOptions,
+    ) -> Result<(), AnkiError> {
+        let request = UpdateModelTemplatesInput {
+            model: UpdateModelContentMessage {
+                name: model.model_name.to_owned(),
+                templates: HashMap::from([(
+                    model.model_template_name.to_owned(),
+                    UpdateModelCardTemplateMessage {
+                        front: tokio::fs::read_to_string(model.model_template_front.clone())
+                            .await?,
+                        back: tokio::fs::read_to_string(model.model_template_back.clone()).await?,
+                    },
+                )]),
+            },
+        };
+        match self.send(request).await {
+            Ok(_) => Ok(()),
+            Err(AnkiError::EmptyResponse) => Ok(()),
+            Err(e) => Err(e),
+        }
+    }
+
+    pub async fn create_kanji_model(
+        &self,
+        model_name: &str,
+        model_template_name: &str,
+    ) -> Result<i64, AnkiError> {
         let request = CreateModelInput {
             model_name: model_name.to_owned(),
             css: tokio::fs::read_to_string("res/anki.css").await?,
@@ -39,7 +71,7 @@ impl AnkiClient<'_> {
                 "reference-url".to_owned(),
             ],
             card_templates: vec![CreateModelCardTemplateMessage {
-                name: format!("Default type for '{}'", model_name),
+                name: model_template_name.to_owned(),
                 front: tokio::fs::read_to_string("res/kanji-card-front.html").await?,
                 back: tokio::fs::read_to_string("res/kanji-card-back.html").await?,
             }],
@@ -47,7 +79,11 @@ impl AnkiClient<'_> {
         Ok(self.send(request).await?.id)
     }
 
-    pub async fn create_vocabulary_model(&self, model_name: &str) -> Result<i64, AnkiError> {
+    pub async fn create_vocabulary_model(
+        &self,
+        model_name: &str,
+        model_template_name: &str,
+    ) -> Result<i64, AnkiError> {
         let request = CreateModelInput {
             model_name: model_name.to_owned(),
             css: tokio::fs::read_to_string("res/anki.css").await?,
@@ -69,7 +105,7 @@ impl AnkiClient<'_> {
                 "reference-url".to_owned(),
             ],
             card_templates: vec![CreateModelCardTemplateMessage {
-                name: format!("Default type for '{}'", model_name),
+                name: model_template_name.to_owned(),
                 front: tokio::fs::read_to_string("res/vocabulary-card-front.html").await?,
                 back: tokio::fs::read_to_string("res/vocabulary-card-back.html").await?,
             }],

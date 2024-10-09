@@ -31,7 +31,10 @@ pub async fn handle_create_kanji_deck(
     configuration: &Configuration,
 ) -> anyhow::Result<()> {
     anki_client
-        .create_kanji_model(&configuration.kanji.model_name)
+        .create_kanji_model(
+            &configuration.kanji.model_name,
+            &configuration.kanji.model_template_name,
+        )
         .await?;
     anki_client
         .create_deck(&configuration.kanji.deck_name)
@@ -45,7 +48,10 @@ pub async fn handle_create_vocabulary_deck(
     configuration: &Configuration,
 ) -> anyhow::Result<()> {
     anki_client
-        .create_vocabulary_model(&configuration.vocabulary.model_name)
+        .create_vocabulary_model(
+            &configuration.vocabulary.model_name,
+            &configuration.vocabulary.model_template_name,
+        )
         .await?;
     anki_client
         .create_deck(&configuration.vocabulary.deck_name)
@@ -63,6 +69,20 @@ pub async fn handle_update_model_styling(
         .await?;
     anki_client
         .update_model_styling(&configuration.vocabulary.model_name)
+        .await?;
+    Ok(())
+}
+
+/// Handle `wanikanji update-model-templates` command
+pub async fn handle_update_model_templates(
+    anki_client: &AnkiClient<'_>,
+    configuration: &Configuration,
+) -> anyhow::Result<()> {
+    anki_client
+        .update_model_templates(&configuration.kanji)
+        .await?;
+    anki_client
+        .update_model_templates(&configuration.vocabulary)
         .await?;
     Ok(())
 }

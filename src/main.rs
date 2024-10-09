@@ -42,6 +42,8 @@ pub enum Command {
     InstallVocabulary,
     #[clap(about = "Update Anki model styling to use the included CSS file")]
     UpdateModelStyling,
+    #[clap(about = "Update Anki model templates to use the included HTML files")]
+    UpdateModelTemplates,
 }
 
 #[derive(Debug, Deserialize)]
@@ -54,6 +56,9 @@ pub struct Configuration {
 pub struct ConfigurationDeckOptions {
     pub deck_name: String,
     pub model_name: String,
+    pub model_template_name: String,
+    pub model_template_front: String,
+    pub model_template_back: String,
 }
 
 #[tokio::main]
@@ -90,6 +95,9 @@ async fn main() -> anyhow::Result<()> {
         }
         Command::UpdateModelStyling => {
             app::handle_update_model_styling(&anki_client, &configuration).await?
+        }
+        Command::UpdateModelTemplates => {
+            app::handle_update_model_templates(&anki_client, &configuration).await?
         }
     }
     Ok(())
