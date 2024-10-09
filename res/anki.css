@@ -1,76 +1,85 @@
 :root {
-    --kanji-color: #00A2C7;
-    --vocabulary-color: #30A46C;
-    --black-color: #1C2024;
-    --white-color: #FFFFFF;
+  --kanji-color: #FCFCFD;
+  --vocabulary-color: #FCFCFD;
+  --black-color: #1C2024;
+  --white-color: #FFFFFF;
 
-    font-family: 'Noto Sans JP', 'Noto Sans', sans-serif;
-    color: var(--white-color);
+  font-family: 'Noto Sans JP', 'Noto Sans', sans-serif;
+  color: var(--white-color);
 }
 
 .card {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    max-width: 1024px;
-    margin: 0 auto;
-    padding: 1rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  max-width: 1024px;
+  margin: 0 auto;
+  padding: 1rem;
 }
 
 .card--kanji {
-    background-color: var(--kanji-color);
+  background-color: var(--kanji-color);
 }
 
 .card--vocabulary {
-    background-color: var(--vocabulary-color);
+  background-color: var(--vocabulary-color);
 }
 
 .card__title {
-    text-align: center;
+  text-align: center;
 }
 
 .card__reference-anchor {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    text-align: right;
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  text-align: right;
 
-    & > a {
-        text-decoration: none;
-        color: var(--black-color);
-        font-weight: bold;
-    }
+  & > a {
+    text-decoration: none;
+    color: var(--black-color);
+    font-weight: bold;
+  }
 }
 
 .context__grid {
-    border-top: 1px solid var(--black-color);
-    margin-top: 4rem;
-    padding-top: 1rem;
+  border-top: 1px solid var(--black-color);
+  margin-top: 4rem;
+  padding-top: 1rem;
 
-    display: grid;
-    gap: 1rem;
+  display: grid;
+  gap: 1rem;
 }
 
 .context__grid--3 {
+  grid-template-columns: 1fr;
+
+  @media (min-width: 768px) {
     grid-template-columns: 1fr 1fr 1fr;
+  }
 }
 
 .context__grid--2 {
+  grid-template-columns: 1fr;
+
+  @media (min-width: 768px) {
     grid-template-columns: 1fr 1fr;
+  }
 }
 
 .context__title {
-    font-weight: bold;
-    margin: 0;
+  font-weight: bold;
+  margin: 0;
+  text-align: left;
 }
 
 .context__list {
-    & > dt {
-        font-size: 24px;
-    }
+  & > dt {
+    font-size: 24px;
+  }
 
-    & > dd {
-        margin-left: 0;
-        margin-bottom: 1rem;
-    }
+  & > dd {
+    margin-left: 0;
+    margin-bottom: 1rem;
+  }
 }
