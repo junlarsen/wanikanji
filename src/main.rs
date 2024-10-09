@@ -4,6 +4,8 @@ use crate::kanji::ApiKanjiMessage;
 use crate::query::QueryClient;
 use crate::vocabulary::ApiVocabularyMessage;
 use clap::Parser;
+use config::Config;
+use serde::Deserialize;
 
 pub mod anki;
 pub mod anki_connect;
@@ -25,9 +27,6 @@ pub struct Options {
     pub anki_endpoint: String,
 }
 
-const DEFAULT_KANJI_DECK_NAME: &str = "Japanese Kanji";
-const DEFAULT_VOCABULARY_DECK_NAME: &str = "Japanese Vocabulary";
-
 #[derive(clap::Subcommand)]
 pub enum Command {
     #[clap(about = "Download all kanji data from wanikani")]
@@ -35,34 +34,38 @@ pub enum Command {
     #[clap(about = "Download all vocabulary data from wanikani")]
     QueryVocabulary,
     #[clap(about = "Create Anki deck and Anki card type for Kanji")]
-    CreateKanjiDeck {
-        #[clap(short, long, default_value = DEFAULT_KANJI_DECK_NAME)]
-        name: String,
-    },
+    CreateKanjiDeck,
     #[clap(about = "Create Anki deck and Anki card type for Vocabulary")]
-    CreateVocabularyDeck {
-        #[clap(short, long, default_value = DEFAULT_VOCABULARY_DECK_NAME)]
-        name: String,
-    },
+    CreateVocabularyDeck,
     #[clap(about = "Install previously downloaded Kanji data into Anki deck")]
-    InstallKanji {
-        #[clap(short, long, default_value = DEFAULT_KANJI_DECK_NAME)]
-        deck_name: String,
-        #[clap(short, long, default_value = DEFAULT_KANJI_DECK_NAME)]
-        model_name: String,
-    },
+    InstallKanji,
     #[clap(about = "Install previously downloaded Vocabulary data into Anki deck")]
-    InstallVocabulary {
-        #[clap(short, long, default_value = DEFAULT_VOCABULARY_DECK_NAME)]
-        deck_name: String,
-        #[clap(short, long, default_value = DEFAULT_VOCABULARY_DECK_NAME)]
-        model_name: String,
-    },
+    InstallVocabulary,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct Configuration {
+    pub kanji: ConfigurationDeckOptions,
+    pub vocabulary: ConfigurationDeckOptions,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ConfigurationDeckOptions {
+    pub deck_name: String,
+    pub model_name: String,
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt::init();
+
+    let settings = Config::builder()
+        .add_source(config::File::with_name("wanikanji"))
+        .build()?;
+    let configuration = settings
+        .try_deserialize::<Configuration>()
+        .expect("failed to deserialize configuration, does wanikanji.toml exist?");
+    tracing::debug!("running wanikanji with configuration {:?}", &configuration);
 
     let args = Options::parse();
     let cache = FilesystemCache::new(&args.cache_dir).await?;
@@ -78,23 +81,31 @@ async fn main() -> anyhow::Result<()> {
             let vocabulary = wanikani_client.list_vocabulary().await?;
             cache.insert("vocabulary", &vocabulary).await?;
         }
-        Command::CreateKanjiDeck { name } => {
-            anki_client.create_kanji_model(&name).await?;
-            anki_client.create_deck(&name).await?;
+        Command::CreateKanjiDeck => {
+            anki_client
+                .create_kanji_model(&configuration.kanji.model_name)
+                .await?;
+            anki_client
+                .create_deck(&configuration.kanji.deck_name)
+                .await?;
         }
-        Command::CreateVocabularyDeck { name } => {
-            anki_client.create_vocabulary_model(&name).await?;
-            anki_client.create_deck(&name).await?;
+        Command::CreateVocabularyDeck => {
+            anki_client
+                .create_vocabulary_model(&configuration.vocabulary.model_name)
+                .await?;
+            anki_client
+                .create_deck(&configuration.vocabulary.deck_name)
+                .await?;
         }
-        Command::InstallKanji {
-            deck_name,
-            model_name,
-        } => {
+        Command::InstallKanji => {
             let kanji = cache.get::<Vec<ApiKanjiMessage>>("kanji").await?;
             match kanji {
                 Some(kanji) => {
                     for kanji in kanji {
-                        let input = kanji.into_anki_input(&model_name, &deck_name);
+                        let input = kanji.into_anki_input(
+                            &configuration.kanji.model_name,
+                            &configuration.kanji.deck_name,
+                        );
                         // SAFETY: This function has to perform a retry loop, because the Anki Connect API server tends to
                         // become overwhelmed with requests when it's fired off rapidly at the speed tokio+reqwest can perform.
                         fn is_connection_error(e: &AnkiError) -> bool {
@@ -124,15 +135,15 @@ async fn main() -> anyhow::Result<()> {
                 }
             }
         }
-        Command::InstallVocabulary {
-            deck_name,
-            model_name,
-        } => {
+        Command::InstallVocabulary => {
             let vocabulary = cache.get::<Vec<ApiVocabularyMessage>>("vocabulary").await?;
             match vocabulary {
                 Some(vocabulary) => {
                     for vocabulary in vocabulary {
-                        let input = vocabulary.into_anki_input(&model_name, &deck_name);
+                        let input = vocabulary.into_anki_input(
+                            &configuration.vocabulary.model_name,
+                            &configuration.vocabulary.deck_name,
+                        );
                         // SAFETY: This function has to perform a retry loop, because the Anki Connect API server tends to
                         // become overwhelmed with requests when it's fired off rapidly at the speed tokio+reqwest can perform.
                         fn is_connection_error(e: &AnkiError) -> bool {

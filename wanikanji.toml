@@ -1,0 +1,7 @@
+[kanji]
+deck_name = "Japanese Kanji"
+model_name = "Japanese Kanji"
+
+[vocabulary]
+deck_name = "Japanese Vocabulary"
+model_name = "Japanese Vocabulary"
