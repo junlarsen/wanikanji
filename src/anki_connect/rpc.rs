@@ -167,3 +167,28 @@ pub mod add_note {
         const ACTION: &'static str = "addNote";
     }
 }
+
+pub mod update_model_styling {
+    use crate::anki_connect::rpc::AnkiRequest;
+    use serde::Serialize;
+
+    #[derive(Debug, Serialize, Clone)]
+    #[serde(rename_all = "camelCase")]
+    pub struct UpdateModelStylingInput {
+        pub model: UpdateModelModelMessage,
+    }
+
+    #[derive(Debug, Serialize, Clone)]
+    #[serde(rename_all = "camelCase")]
+    pub struct UpdateModelModelMessage {
+        pub name: String,
+        pub css: String,
+    }
+
+    impl AnkiRequest for UpdateModelStylingInput {
+        type Response = ();
+
+        const VERSION: u16 = 6;
+        const ACTION: &'static str = "updateModelStyling";
+    }
+}

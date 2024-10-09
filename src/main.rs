@@ -25,8 +25,8 @@ pub struct Options {
     pub anki_endpoint: String,
 }
 
-const DEFAULT_KANJI_DECK_NAME: &'static str = "Japanese Kanji";
-const DEFAULT_VOCABULARY_DECK_NAME: &'static str = "Japanese Vocabulary";
+const DEFAULT_KANJI_DECK_NAME: &str = "Japanese Kanji";
+const DEFAULT_VOCABULARY_DECK_NAME: &str = "Japanese Vocabulary";
 
 #[derive(clap::Subcommand)]
 pub enum Command {
