@@ -53,6 +53,20 @@ pub async fn handle_create_vocabulary_deck(
     Ok(())
 }
 
+/// Handle `wanikanji update-model-styling` command
+pub async fn handle_update_model_styling(
+    anki_client: &AnkiClient<'_>,
+    configuration: &Configuration,
+) -> anyhow::Result<()> {
+    anki_client
+        .update_model_styling(&configuration.kanji.model_name)
+        .await?;
+    anki_client
+        .update_model_styling(&configuration.vocabulary.model_name)
+        .await?;
+    Ok(())
+}
+
 /// Handle `wanikanji install-kanji` command
 pub async fn handle_install_kanji(
     cache: &FilesystemCache<'_>,

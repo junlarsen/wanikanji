@@ -9,8 +9,12 @@ pub enum AnkiError {
     HttpError(#[from] reqwest::Error),
     #[error("anki data serde error: {0}")]
     SerdeError(#[from] serde_json::Error),
-    #[error("anki api error: {0}")]
+    #[error("anki endpoint returned nothing")]
+    EmptyResponse,
+    #[error("anki endpoint returned error: {0}")]
     ApiError(String),
+    #[error("io error: {0}")]
+    Io(#[from] tokio::io::Error),
 }
 
 pub struct AnkiClient<'a> {
@@ -58,7 +62,7 @@ impl<'a> AnkiClient<'a> {
         match (response.result, response.error) {
             (Some(result), _) => Ok(result),
             (None, Some(error)) => Err(AnkiError::ApiError(error)),
-            (None, None) => Err(AnkiError::ApiError("no result or error".to_owned())),
+            (None, None) => Err(AnkiError::EmptyResponse),
         }
     }
 }

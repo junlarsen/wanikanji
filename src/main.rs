@@ -40,6 +40,8 @@ pub enum Command {
     InstallKanji,
     #[clap(about = "Install previously downloaded Vocabulary data into Anki deck")]
     InstallVocabulary,
+    #[clap(about = "Update Anki model styling to use the included CSS file")]
+    UpdateModelStyling,
 }
 
 #[derive(Debug, Deserialize)]
@@ -85,6 +87,9 @@ async fn main() -> anyhow::Result<()> {
         }
         Command::InstallVocabulary => {
             app::handle_install_vocabulary(&cache, &anki_client, &configuration).await?
+        }
+        Command::UpdateModelStyling => {
+            app::handle_update_model_styling(&anki_client, &configuration).await?
         }
     }
     Ok(())
