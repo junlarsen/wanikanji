@@ -4,13 +4,22 @@
   <h1 class="card__title">
     {{primary-meaning}}
   </h1>
-
   <h2 class="card__title">
     {{readings}}
   </h2>
+
+  {{#reference-url}}
   <div class="card__reference-anchor">
-    <a href="{{reference-url}}">Open in WK</a>
+    <a href="{{reference-url}}">Reference</a>
   </div>
+  {{/reference-url}}
+
+  {{#Tags}}
+  <div class="card__tags-anchor">
+    <p>{{Tags}}</p>
+  </div>
+  {{/Tags}}
+
   <div class="context__grid context__grid--2">
     <div class="context__item">
       <details>

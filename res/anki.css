@@ -26,6 +26,7 @@
 }
 
 .card__title {
+  margin-top: 3rem;
   text-align: center;
 }
 
@@ -40,6 +41,14 @@
     color: var(--black-color);
     font-weight: bold;
   }
+}
+
+.card__tags-anchor {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  text-align: left;
+  text-decoration: underline;
 }
 
 .context__grid {

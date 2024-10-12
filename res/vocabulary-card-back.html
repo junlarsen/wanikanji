@@ -8,9 +8,19 @@
   <h2 class="card__title">
     {{primary-reading}}
   </h2>
+
+  {{#reference-url}}
   <div class="card__reference-anchor">
-    <a href="{{reference-url}}">Open in WK</a>
+    <a href="{{reference-url}}">Reference</a>
   </div>
+  {{/reference-url}}
+
+  {{#Tags}}
+  <div class="card__tags-anchor">
+    <p>{{Tags}}</p>
+  </div>
+  {{/Tags}}
+
   <div class="context__grid context__grid--3">
     <div class="context__item">
       <details>
@@ -24,8 +34,12 @@
         <p>{{primary-reading-mnemonic}}</p>
       </details>
     </div>
+
     <div class="context__item">
-      <h4 class="context__title">Readings</h4>
+      <h4 class="context__title">Secondary meanings</h4>
+      <p>{{secondary-meanings}}</p>
+
+      <h4 class="context__title">Secondary readings</h4>
       <p>{{secondary-readings}}</p>
     </div>
   </div>
